@@ -17,12 +17,23 @@ def start_screen_difference(screen, bounds, base_img):
 	total_img = np.subtract(partial,base_img)
 	return int(np.sum(np.sum(total_img)))
 	
+def determine_score(screen, bounds,previous_score):
+	partial = screen[bounds[0]:bounds[1],bounds[2]:bounds[3]]
+	partial = cv2.cvtColor(partial, cv2.COLOR_BGR2GRAY)
+	ret, partial = cv2.threshold(partial, 180, 255, cv2.THRESH_BINARY_INV)
+	score_str = pytesseract.image_to_string(Image.fromarray(partial), config='-l eng --oem 1 --psm 3')
+
+	if score_str.isdigit() and int(score_str) > previous_score:
+		return int(score_str)
+
+	return previous_score
 
 def main(): 
 	
 	pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files (x86)\\Tesseract-OCR\\tesseract' # locate pytesseract for score recognition
 	frame_bounds = (0,240,3840,2060) # set frame bounds for game in full screen browser. Represents actual pyautogui coordinates
 	home_bounds = (260,610,1300,2150) # set bounds for homescreen identification. Currently represents slice values in tuple format
+	score_bounds = (1700,1775,205,450)
 	start_button_loc = (1929,1280) # pyautogui coordinates for start button click
 	finish_time = time.time() + 14400 # current time + four hours
 	home_base_img = cv2.imread("home_base.png") # comparison image for home page. Need to change if home_bounds tuple changes.
@@ -46,21 +57,24 @@ def main():
 		time.sleep(2) # wait for screen fade to start acting
 
 		time_step = 0
-
+		score = 0
 
 		current_screen = np.array(ImageGrab.grab(bbox=frame_bounds))
 		# while the start screen isn't the current screen
 		while start_screen_difference(current_screen,home_bounds,home_base_img) != 0:
 			# write full size image out
 			cv2.imwrite((saved_images_directory + "\\" + str(time_step) + ".jpg"), current_screen)
-			#TODO:
-				# resize image and get score
-				# need to save image to array for training
-			#current_screen = cv2.resize(current_screen, (0,0), fx=0.20, fy=0.20)
-			# write position and score to csv
-			# save position and score for training			
+			cursor_pos = pg.position()
+			# TODO: add speed capabilities and add to csv
+			# NOTE: score is not written to csv because determining score in round causes framerate issues
+			csv_writer.writerow([cursor_pos[0],cursor_pos[1]])
+
+
+			# save position and score for training	
+
 			# predict action
 			# take action
+
 			# new screen grab
 			current_screen = np.array(ImageGrab.grab(bbox=frame_bounds))
 			time_step += 1
