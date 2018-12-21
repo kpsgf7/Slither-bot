@@ -13,12 +13,8 @@ import csv
 
 def start_screen_difference(screen, bounds, base_img):
 	# home bounds are a tuple of numbers for the slice. This is probably going to change.
-
-
 	partial = screen[bounds[0]:bounds[1],bounds[2]:bounds[3]]
-
-	total_img = np.subtract(partial, base_img)
-
+	total_img = np.subtract(partial,base_img)
 	return int(np.sum(np.sum(total_img)))
 	
 
@@ -26,7 +22,7 @@ def main():
 	
 	pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files (x86)\\Tesseract-OCR\\tesseract' # locate pytesseract for score recognition
 	frame_bounds = (0,240,3840,2060) # set frame bounds for game in full screen browser. Represents actual pyautogui coordinates
-	home_bounds = (260,610,1300,2500) # set bounds for homescreen identification. Currently represents slice values in tuple format
+	home_bounds = (260,610,1300,2150) # set bounds for homescreen identification. Currently represents slice values in tuple format
 	start_button_loc = (1929,1280) # pyautogui coordinates for start button click
 	finish_time = time.time() + 14400 # current time + four hours
 	home_base_img = cv2.imread("home_base.png") # comparison image for home page. Need to change if home_bounds tuple changes.
@@ -60,12 +56,11 @@ def main():
 			#TODO:
 				# resize image and get score
 				# need to save image to array for training
-			current_screen = cv2.resize(current_screen, (0,0), fx=0.20, fy=0.20)
+			#current_screen = cv2.resize(current_screen, (0,0), fx=0.20, fy=0.20)
 			# write position and score to csv
 			# save position and score for training			
 			# predict action
 			# take action
-			print(time_step)
 			# new screen grab
 			current_screen = np.array(ImageGrab.grab(bbox=frame_bounds))
 			time_step += 1
